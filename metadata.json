@@ -1,0 +1,6 @@
+{
+  "name": "AI Career Counselor",
+  "description": "An expert AI Career Guidance Counselor that analyzes student profiles to recommend optimal career paths, alternative options, required certifications, missing skills, and step-by-step learning roadmaps with salary trends and future outlook.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
