@@ -11,12 +11,40 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Initialize Gemini SDK with telemetry header
+// Initialize Gemini SDK with telemetry header and robust fallback resolution
 const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  let apiKey = process.env.GEMINI_API_KEY;
+  
+  if (!apiKey) {
+    // Fallback to keys with trailing periods, spaces, or other variations
+    const envKeys = Object.keys(process.env);
+    const fallbackKeyName = envKeys.find(k => k.trim().replace(/\.+$/, "") === "GEMINI_API_KEY");
+    if (fallbackKeyName) {
+      console.log(`Found fallback env key in process.env: "${fallbackKeyName}"`);
+      apiKey = process.env[fallbackKeyName];
+    }
+  }
+
+  if (apiKey) {
+    apiKey = apiKey.trim();
+    if (apiKey.startsWith('"') && apiKey.endsWith('"')) {
+      apiKey = apiKey.slice(1, -1);
+    }
+    if (apiKey.startsWith("'") && apiKey.endsWith("'")) {
+      apiKey = apiKey.slice(1, -1);
+    }
+  }
+
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY environment variable is not defined in the Secrets panel.");
   }
+
+  // Safe debug log to confirm initialization
+  const maskedKey = apiKey.length > 6 
+    ? `${apiKey.substring(0, 3)}...${apiKey.substring(apiKey.length - 3)}`
+    : "***";
+  console.log(`Initializing GoogleGenAI with key (length: ${apiKey.length}, preview: ${maskedKey})`);
+
   return new GoogleGenAI({
     apiKey: apiKey,
     httpOptions: {
@@ -55,82 +83,109 @@ Student Details:
 Follow the rules strictly. Recommend the single best career path, up to 2 solid alternative options, explain why, identify missing skills based on the recommended path, list certifications, build a step-by-step learning roadmap, list target job roles, estimate entry-level Indian salary range, describe future scope, and provide a short, supportive summary.
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: userPrompt,
-      config: {
-        systemInstruction: systemInstruction,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            recommendedCareer: { 
-              type: Type.STRING,
-              description: "The primary single best career path recommendation (e.g. 'Full-Stack Web Developer' or 'Data Scientist')."
-            },
-            alternativeCareers: { 
-              type: Type.ARRAY, 
-              items: { type: Type.STRING },
-              description: "List of up to two solid alternative career paths suited to their profile."
-            },
-            reason: { 
-              type: Type.STRING,
-              description: "An explanation of why this primary career is the best fit for their specific skills, degree, and interests."
-            },
-            requiredSkills: { 
-              type: Type.ARRAY, 
-              items: { type: Type.STRING },
-              description: "Key technical and soft skills required for the recommended career path."
-            },
-            missingSkills: { 
-              type: Type.ARRAY, 
-              items: { type: Type.STRING },
-              description: "Specific skills the student currently lacks but needs to learn for the recommended path."
-            },
-            certifications: { 
-              type: Type.ARRAY, 
-              items: { type: Type.STRING },
-              description: "A list of 2-3 globally recognized industry certifications that will boost their resume."
-            },
-            learningRoadmap: { 
-              type: Type.ARRAY, 
-              items: { type: Type.STRING },
-              description: "A step-by-step learning roadmap (e.g., 'Step 1: Learn X', 'Step 2: Master Y', etc.)."
-            },
-            jobRoles: { 
-              type: Type.ARRAY, 
-              items: { type: Type.STRING },
-              description: "Specific job designations they can apply for (e.g., 'Junior Software Engineer', 'Associate ML Developer')."
-            },
-            salaryRangeIndia: { 
-              type: Type.STRING,
-              description: "Realistic entry-level annual salary range in India (e.g., '₹4,50,000 - ₹8,00,000 per annum'). Use INR format."
-            },
-            futureScope: { 
-              type: Type.STRING,
-              description: "Detailed industry outlook and future growth scope for this career path over the next 5-10 years."
-            },
-            summary: { 
-              type: Type.STRING,
-              description: "A concise, encouraging summary and next steps."
+    // Robust exponential backoff retry wrapper for Gemini generateContent call
+    const generateWithRetry = async (retries = 4, initialDelay = 1000) => {
+      let delay = initialDelay;
+      const modelsToTry = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.1-flash-lite"];
+      
+      for (let i = 1; i <= retries; i++) {
+        const currentModel = modelsToTry[Math.min(i - 1, modelsToTry.length - 1)];
+        try {
+          console.log(`Generating guidance using "${currentModel}" (Attempt ${i} of ${retries})...`);
+          const response = await ai.models.generateContent({
+            model: currentModel,
+            contents: userPrompt,
+            config: {
+              systemInstruction: systemInstruction,
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  recommendedCareer: { 
+                    type: Type.STRING,
+                    description: "The primary single best career path recommendation (e.g. 'Full-Stack Web Developer' or 'Data Scientist')."
+                  },
+                  alternativeCareers: { 
+                    type: Type.ARRAY, 
+                    items: { type: Type.STRING },
+                    description: "List of up to two solid alternative career paths suited to their profile."
+                  },
+                  reason: { 
+                    type: Type.STRING,
+                    description: "An explanation of why this primary career is the best fit for their specific skills, degree, and interests."
+                  },
+                  requiredSkills: { 
+                    type: Type.ARRAY, 
+                    items: { type: Type.STRING },
+                    description: "Key technical and soft skills required for the recommended career path."
+                  },
+                  missingSkills: { 
+                    type: Type.ARRAY, 
+                    items: { type: Type.STRING },
+                    description: "Specific skills the student currently lacks but needs to learn for the recommended path."
+                  },
+                  certifications: { 
+                    type: Type.ARRAY, 
+                    items: { type: Type.STRING },
+                    description: "A list of 2-3 globally recognized industry certifications that will boost their resume."
+                  },
+                  learningRoadmap: { 
+                    type: Type.ARRAY, 
+                    items: { type: Type.STRING },
+                    description: "A step-by-step learning roadmap (e.g., 'Step 1: Learn X', 'Step 2: Master Y', etc.)."
+                  },
+                  jobRoles: { 
+                    type: Type.ARRAY, 
+                    items: { type: Type.STRING },
+                    description: "Specific job designations they can apply for (e.g., 'Junior Software Engineer', 'Associate ML Developer')."
+                  },
+                  salaryRangeIndia: { 
+                    type: Type.STRING,
+                    description: "Realistic entry-level annual salary range in India (e.g., '₹4,50,000 - ₹8,00,000 per annum'). Use INR format."
+                  },
+                  futureScope: { 
+                    type: Type.STRING,
+                    description: "Detailed industry outlook and future growth scope for this career path over the next 5-10 years."
+                  },
+                  summary: { 
+                    type: Type.STRING,
+                    description: "A concise, encouraging summary and next steps."
+                  }
+                },
+                required: [
+                  "recommendedCareer",
+                  "alternativeCareers",
+                  "reason",
+                  "requiredSkills",
+                  "missingSkills",
+                  "certifications",
+                  "learningRoadmap",
+                  "jobRoles",
+                  "salaryRangeIndia",
+                  "futureScope",
+                  "summary"
+                ]
+              }
             }
-          },
-          required: [
-            "recommendedCareer",
-            "alternativeCareers",
-            "reason",
-            "requiredSkills",
-            "missingSkills",
-            "certifications",
-            "learningRoadmap",
-            "jobRoles",
-            "salaryRangeIndia",
-            "futureScope",
-            "summary"
-          ]
+          });
+          return response;
+        } catch (err: any) {
+          const errMsg = err?.message || String(err);
+          console.error(`Attempt ${i} with "${currentModel}" failed:`, errMsg);
+          
+          if (i === retries) {
+            throw err;
+          }
+          
+          console.log(`Model service busy/unavailable. Retrying in ${delay}ms...`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          delay *= 1.5; // Slightly more balanced multiplier
         }
       }
-    });
+      throw new Error(`Failed to contact any model after multiple retries.`);
+    };
+
+    const response = await generateWithRetry(4, 1500);
 
     const resultText = response.text;
     if (!resultText) {
@@ -141,8 +196,19 @@ Follow the rules strictly. Recommend the single best career path, up to 2 solid 
     res.json(guidanceData);
   } catch (error: any) {
     console.error("Error generating guidance:", error);
+    
+    // Customize user error message for common 503/high load responses
+    let friendlyMessage = "Failed to generate career guidance.";
+    const errString = JSON.stringify(error) || String(error);
+    
+    if (errString.includes("503") || errString.includes("high demand") || errString.includes("UNAVAILABLE") || errString.includes("busy")) {
+      friendlyMessage = "The AI model is currently experiencing high demand and is temporarily unavailable. Please try submitting again in a few moments.";
+    } else if (errString.includes("API key") || errString.includes("KEY")) {
+      friendlyMessage = "Gemini API authorization failed. Please check or re-add your GEMINI_API_KEY in the Secrets panel.";
+    }
+
     res.status(500).json({ 
-      error: "Failed to generate career guidance.", 
+      error: friendlyMessage, 
       details: error.message || error 
     });
   }

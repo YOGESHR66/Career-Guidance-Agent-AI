@@ -58,3 +58,46 @@ Follow these steps to run the project in your local development environment:
 ```bash
 git clone https://github.com/YOGESHR66/Career-Guidance-Agent-AI.git
 cd Career-Guidance-Agent-AI
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+```
+
+### 3. Configure Environment Variables
+Create a `.env` file in the root directory and add your Google Gemini API Key:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+### 4. Run the Development Server
+```bash
+npm run dev
+```
+The server will start running locally at: **`http://localhost:3000`**
+
+### 5. Production Build
+To bundle the frontend assets and compile the server for production:
+```bash
+npm run build
+npm start
+```
+
+---
+
+## ☁️ Deployment on Render
+
+This project is fully ready for deployment on **Render.com** (as a Web Service) or any containerized platform using Docker.
+
+### Manual Configuration on Render:
+1.  **Repository:** Connect your GitHub repository `Career-Guidance-Agent-AI`.
+2.  **Runtime:** Select `Node`.
+3.  **Build Command:** `npm install && npm run build`
+4.  **Start Command:** `npm start`
+5.  **Environment Variables:** Under the "Environment" tab, add `GEMINI_API_KEY` with your secret key.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
