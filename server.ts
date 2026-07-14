@@ -47,11 +47,6 @@ const getGeminiClient = () => {
 
   return new GoogleGenAI({
     apiKey: apiKey,
-    httpOptions: {
-      headers: {
-        "User-Agent": "aistudio-build",
-      },
-    },
   });
 };
 
@@ -84,9 +79,10 @@ Follow the rules strictly. Recommend the single best career path, up to 2 solid 
 `;
 
     // Robust exponential backoff retry wrapper for Gemini generateContent call
-    const generateWithRetry = async (retries = 4, initialDelay = 1000) => {
+    const generateWithRetry = async (retries = 3, initialDelay = 500) => {
       let delay = initialDelay;
-      const modelsToTry = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.1-flash-lite"];
+      // Use the fastest model first to reduce load time
+      const modelsToTry = ["gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-3.5-flash"];
       
       for (let i = 1; i <= retries; i++) {
         const currentModel = modelsToTry[Math.min(i - 1, modelsToTry.length - 1)];
@@ -173,11 +169,16 @@ Follow the rules strictly. Recommend the single best career path, up to 2 solid 
           const errMsg = err?.message || String(err);
           console.error(`Attempt ${i} with "${currentModel}" failed:`, errMsg);
           
+          // Do not retry if the API key is invalid
+          if (errMsg.includes("401") || errMsg.includes("UNAUTHENTICATED") || errMsg.includes("API_KEY_INVALID") || errMsg.includes("ACCESS_TOKEN_TYPE_UNSUPPORTED")) {
+            throw new Error(`Authentication failed. Your Gemini API key is invalid or expired. Please check your Settings -> Secrets panel and update the GEMINI_API_KEY. (Original error: ${errMsg})`);
+          }
+
           if (i === retries) {
             throw err;
           }
           
-          console.log(`Model service busy/unavailable. Retrying in ${delay}ms...`);
+          console.log(`Retrying in ${delay}ms...`);
           await new Promise((resolve) => setTimeout(resolve, delay));
           delay *= 1.5; // Slightly more balanced multiplier
         }
@@ -185,7 +186,7 @@ Follow the rules strictly. Recommend the single best career path, up to 2 solid 
       throw new Error(`Failed to contact any model after multiple retries.`);
     };
 
-    const response = await generateWithRetry(4, 1500);
+    const response = await generateWithRetry(3, 500);
 
     const resultText = response.text;
     if (!resultText) {

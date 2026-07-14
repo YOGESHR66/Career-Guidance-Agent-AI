@@ -3,6 +3,7 @@ import { StudentProfile, CareerGuidance } from "./types";
 import { StudentForm } from "./components/StudentForm";
 import { GuidanceDashboard } from "./components/GuidanceDashboard";
 import { HistoryPanel } from "./components/HistoryPanel";
+import { Login } from "./components/Login";
 import { 
   Compass, 
   Sparkles, 
@@ -30,6 +31,7 @@ const INITIAL_PROFILE: StudentProfile = {
 };
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profile, setProfile] = useState<StudentProfile>(INITIAL_PROFILE);
   const [guidance, setGuidance] = useState<CareerGuidance | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -136,6 +138,10 @@ export default function App() {
     setError(null);
   };
 
+  if (!isLoggedIn) {
+    return <Login onLogin={() => setIsLoggedIn(true)} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       {/* Dynamic Upper Header following Geometric Balance design */}
@@ -165,6 +171,12 @@ export default function App() {
                 Reset Form
               </button>
             )}
+            <button
+              onClick={() => setIsLoggedIn(false)}
+              className="px-4 py-2 text-xs font-bold uppercase tracking-tight border border-slate-200 hover:border-rose-500 text-slate-500 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 transition-all rounded"
+            >
+              Sign Out
+            </button>
             <div className="hidden md:block">
               <div className="bg-slate-900 text-white px-3 py-1 text-[11px] font-bold uppercase tracking-tighter inline-block">
                 SYSTEM: STABLE
