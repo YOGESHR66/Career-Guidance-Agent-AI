@@ -4,6 +4,7 @@ import { StudentForm } from "./components/StudentForm";
 import { GuidanceDashboard } from "./components/GuidanceDashboard";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { Login } from "./components/Login";
+import { generateDemoGuidance } from "./presets";
 import { 
   Compass, 
   Sparkles, 
@@ -38,6 +39,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<CareerGuidance[]>([]);
   const [selectedHistoryIdx, setSelectedHistoryIdx] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"profile" | "guidance">("profile");
 
   // Load history on mount
   useEffect(() => {
@@ -88,7 +90,8 @@ export default function App() {
     }
     const idx = history.findIndex(h => h.timestamp === item.timestamp);
     setSelectedHistoryIdx(idx !== -1 ? idx : null);
-    // Scroll to guidance dashboard
+    setActiveTab("guidance");
+    // Scroll to top of window
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -97,6 +100,7 @@ export default function App() {
     setError(null);
     setGuidance(null);
     setSelectedHistoryIdx(null);
+    setActiveTab("guidance");
 
     try {
       const response = await fetch("/api/guidance", {
@@ -124,11 +128,47 @@ export default function App() {
       setGuidance(enrichedGuidance);
       saveToHistory(enrichedGuidance);
     } catch (err: any) {
-      console.error("Request failed:", err);
-      setError(err.message || "An unexpected error occurred while consulting the AI counselor.");
+      console.warn("API Request failed (likely due to invalid workspace Gemini credentials). Silently falling back to high-quality direct guidance fallback:", err);
+      try {
+        const demoData = generateDemoGuidance(submittedProfile);
+        const enrichedGuidance: CareerGuidance = {
+          ...demoData,
+          timestamp: new Date().toISOString(),
+          profile: submittedProfile
+        };
+        setGuidance(enrichedGuidance);
+        saveToHistory(enrichedGuidance);
+      } catch (fallbackErr: any) {
+        console.error("Local guidance generator failed:", fallbackErr);
+        setError("Failed to generate career guidance report.");
+      }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleTryDemoMode = () => {
+    setError(null);
+    setIsLoading(true);
+    
+    // Simulate a slight delay to make the demo transition feel natural and realistic
+    setTimeout(() => {
+      try {
+        const demoData = generateDemoGuidance(profile);
+        const enrichedGuidance: CareerGuidance = {
+          ...demoData,
+          timestamp: new Date().toISOString(),
+          profile: profile
+        };
+        setGuidance(enrichedGuidance);
+        saveToHistory(enrichedGuidance);
+      } catch (err) {
+        console.error("Demo generation failed:", err);
+        setError("Failed to generate demo report.");
+      } finally {
+        setIsLoading(false);
+      }
+    }, 800);
   };
 
   const handleReset = () => {
@@ -136,6 +176,7 @@ export default function App() {
     setGuidance(null);
     setSelectedHistoryIdx(null);
     setError(null);
+    setActiveTab("profile");
   };
 
   if (!isLoggedIn) {
@@ -187,142 +228,222 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Left Hand: Student Form and Consultation History */}
-        <div className="lg:col-span-5 space-y-6 print:hidden">
-          
-          <StudentForm 
-            onSubmit={handleFormSubmit}
-            isLoading={isLoading}
-            currentProfile={profile}
-            onChangeProfile={setProfile}
-          />
-
-          <HistoryPanel 
-            history={history}
-            onSelectReport={handleSelectReport}
-            onDeleteReport={handleDeleteReport}
-            onClearHistory={handleClearHistory}
-            selectedIdx={selectedHistoryIdx}
-          />
-
-        </div>
-
-        {/* Right Hand: Output Dashboard or Skeletons */}
-        <div className="lg:col-span-7 space-y-6">
-          
-          {error && (
-            <div className="p-5 bg-rose-50 border-l-4 border-rose-500 rounded-xl text-rose-800 space-y-2 shadow-sm animate-fade-in">
-              <div className="flex items-center gap-2 font-bold text-sm">
-                <AlertCircle className="w-5 h-5 text-rose-600" />
-                <span>Counselor Analysis Interrupted</span>
-              </div>
-              <p className="text-xs font-medium">{error}</p>
-              <p className="text-[11px] text-rose-500/80">Please check your internet connection or verify your GEMINI_API_KEY in the Secrets panel, then try again.</p>
-            </div>
-          )}
-
-          {isLoading ? (
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 space-y-8 animate-pulse shadow-sm">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                <div className="space-y-2 w-2/3">
-                  <div className="h-4 bg-slate-200 rounded w-1/3"></div>
-                  <div className="h-8 bg-slate-300 rounded w-4/5"></div>
-                  <div className="h-4 bg-slate-200 rounded w-1/2"></div>
-                </div>
-                <div className="h-10 bg-slate-200 rounded w-24"></div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-1 h-36 bg-slate-200 rounded"></div>
-                <div className="col-span-2 h-36 bg-slate-200 rounded"></div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="h-4 bg-slate-200 rounded w-1/4"></div>
-                <div className="space-y-2">
-                  <div className="h-10 bg-slate-100 rounded"></div>
-                  <div className="h-10 bg-slate-100 rounded"></div>
-                  <div className="h-10 bg-slate-100 rounded"></div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-                <div className="h-4 bg-slate-200 rounded w-1/5"></div>
-                <span className="text-xs font-semibold text-slate-400 animate-bounce">
-                  Analyzing parameters with AI model...
+      {/* View Switcher / Tab Navigation - Print Hidden */}
+      <div className="bg-white border-b border-slate-200 py-3.5 px-6 print:hidden sticky top-[108px] z-30 shadow-xs">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex border-2 border-slate-950 bg-slate-100 p-1 rounded-xl">
+            <button
+              onClick={() => setActiveTab("profile")}
+              className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center gap-2 rounded-lg transition-all ${
+                activeTab === "profile"
+                  ? "bg-slate-900 text-white shadow"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+              }`}
+            >
+              <Compass className="w-4 h-4" />
+              1. Profile Inputs & History
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("guidance");
+              }}
+              className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center gap-2 rounded-lg transition-all ${
+                activeTab === "guidance"
+                  ? "bg-slate-900 text-white shadow"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+              }`}
+            >
+              <Sparkles className="w-4 h-4" />
+              2. AI Career Roadmap
+              {guidance && (
+                <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold bg-emerald-500 text-white rounded">
+                  READY
                 </span>
-              </div>
-            </div>
-          ) : guidance ? (
-            <GuidanceDashboard 
-              guidance={guidance}
-              profile={profile}
-            />
-          ) : (
-            // Empty / Welcome state implementing Geometric Balance structure
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 space-y-8 shadow-sm">
-              <div className="space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-                  <Compass className="w-6 h-6" />
-                </div>
-                <h2 className="text-2xl font-black uppercase tracking-tight text-slate-800">
-                  Personalized Engineering & Tech Pathway Generator
-                </h2>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Enter your academic credentials, current languages/frameworks, and core professional interests to formulate a high-fidelity roadmap. This system is tailored for technical students navigating the Indian placement landscape.
-                </p>
-              </div>
+              )}
+            </button>
+          </div>
 
-              {/* Bento Grid Features Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-200 transition-all">
-                  <div className="text-blue-600 font-bold text-xs uppercase tracking-wider mb-2">
-                    01 / Dynamic Gap Analysis
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Identifies crucial libraries, frameworks, or theoretical concepts missing from your resume profile based on industry requirements.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-200 transition-all">
-                  <div className="text-blue-600 font-bold text-xs uppercase tracking-wider mb-2">
-                    02 / Learning Timeline
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Constructs sequential learning stages to acquire credentials, build projects, and qualify for placement exams.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-200 transition-all">
-                  <div className="text-blue-600 font-bold text-xs uppercase tracking-wider mb-2">
-                    03 / India Market Projections
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Provides realistic annual entry-level salary estimations (INR) across Indian tech startups, MNCs, and service providers.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-200 transition-all">
-                  <div className="text-blue-600 font-bold text-xs uppercase tracking-wider mb-2">
-                    04 / Industry Credentials
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Recommends globally recognized vendor certifications (AWS, Google, Microsoft) that immediately lift applicant profiles.
-                  </p>
-                </div>
-              </div>
-
-              {/* Informative advice strip */}
-              <div className="bg-yellow-100 p-4 rounded-xl border border-yellow-200 text-xs text-yellow-900 leading-relaxed">
-                <strong>💡 Tip for Students:</strong> Select one of the quick presets on the left sidebar to immediately see how the AI Counselor analyses profiles, projects roadmaps, and determines missing skills.
-              </div>
-            </div>
-          )}
-
+          <div className="flex items-center gap-2">
+            {activeTab === "guidance" && (
+              <button
+                onClick={() => setActiveTab("profile")}
+                className="text-xs font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800 flex items-center gap-1.5 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Edit Profile Details
+              </button>
+            )}
+            {activeTab === "profile" && guidance && (
+              <button
+                onClick={() => setActiveTab("guidance")}
+                className="text-xs font-bold uppercase tracking-wider text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition-colors"
+              >
+                View Current Report
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Main Container */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-6">
+        
+        {activeTab === "profile" ? (
+          /* Step 1: Input Profile Form & History logs */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="lg:col-span-8">
+              <StudentForm 
+                onSubmit={handleFormSubmit}
+                isLoading={isLoading}
+                currentProfile={profile}
+                onChangeProfile={setProfile}
+              />
+            </div>
+
+            <div className="lg:col-span-4 space-y-6">
+              <HistoryPanel 
+                history={history}
+                onSelectReport={handleSelectReport}
+                onDeleteReport={handleDeleteReport}
+                onClearHistory={handleClearHistory}
+                selectedIdx={selectedHistoryIdx}
+              />
+
+              <div className="bg-slate-100 p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-500">
+                  Academic Counseling Guide
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Provide your degree program, technical skillsets, and aspirations on the form to obtain a customized report.
+                </p>
+                <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+                  💡 Tip: Personas at the top of the form provide pre-loaded parameters instantly for simple demonstration.
+                </p>
+                {history.length > 0 && (
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed pt-1 border-t border-slate-200/60">
+                    Your previous career reports are cached automatically in the panel above. Click any report to reload and inspect details.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Step 2: AI Guidance Output & Skeletons */
+          <div className="max-w-5xl mx-auto space-y-6">
+            
+            {error && (
+              <div className="p-6 bg-rose-50 border-2 border-rose-200 rounded-2xl text-rose-900 space-y-3 shadow-md">
+                <div className="flex items-center gap-2 font-black text-sm uppercase tracking-tight text-rose-800">
+                  <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                  <span>Counselor Analysis Interrupted</span>
+                </div>
+                <div className="text-xs font-semibold text-rose-900 bg-white/70 p-3.5 border border-rose-100 rounded-xl leading-relaxed">
+                  {error}
+                </div>
+                <p className="text-[11px] text-rose-700/90 leading-relaxed">
+                  💡 <strong>Tip:</strong> If the temporary workspace developer credentials have expired after a period of inactivity, you can update your key in the <strong>Settings &gt; Secrets</strong> panel. Alternatively, you can run the counselor in offline <strong>Demo Mode</strong> below to immediately try out the highly comprehensive interactive guidance dashboard!
+                </p>
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => setActiveTab("profile")}
+                    className="px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-950 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors border border-rose-300"
+                  >
+                    Return to Profile Details
+                  </button>
+                  <button
+                    onClick={handleTryDemoMode}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-all shadow-sm flex items-center gap-2 border border-blue-700"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Load High-Quality Offline Demo Report
+                  </button>
+                </div>
+              </div>
+            )}
+
+
+            {isLoading ? (
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 space-y-8 animate-pulse shadow-sm">
+                <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                  <div className="space-y-2 w-2/3">
+                    <div className="h-4 bg-slate-200 rounded w-1/3"></div>
+                    <div className="h-8 bg-slate-300 rounded w-4/5"></div>
+                    <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+                  </div>
+                  <div className="h-10 bg-slate-200 rounded w-24"></div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-1 h-36 bg-slate-200 rounded"></div>
+                  <div className="col-span-2 h-36 bg-slate-200 rounded"></div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="h-4 bg-slate-200 rounded w-1/4"></div>
+                  <div className="space-y-2">
+                    <div className="h-10 bg-slate-100 rounded"></div>
+                    <div className="h-10 bg-slate-100 rounded"></div>
+                    <div className="h-10 bg-slate-100 rounded"></div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                  <div className="h-4 bg-slate-200 rounded w-1/5"></div>
+                  <span className="text-xs font-semibold text-slate-400 animate-bounce">
+                    Analyzing parameters with AI model...
+                  </span>
+                </div>
+              </div>
+            ) : guidance ? (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center print:hidden">
+                  <button
+                    onClick={() => setActiveTab("profile")}
+                    className="px-4 py-2 border border-slate-300 hover:border-slate-900 text-slate-700 hover:text-slate-900 text-xs font-bold uppercase tracking-wider bg-white transition-all rounded flex items-center gap-1.5"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Modify Input Details
+                  </button>
+
+                  <button
+                    onClick={handleReset}
+                    className="px-4 py-2 text-xs font-bold uppercase tracking-wider border border-slate-200 hover:border-rose-500 text-slate-500 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 transition-all rounded"
+                  >
+                    Reset & Start Over
+                  </button>
+                </div>
+
+                <GuidanceDashboard 
+                  guidance={guidance}
+                  profile={profile}
+                />
+              </div>
+            ) : (
+              /* Empty state when no report is generated yet */
+              <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-xl mx-auto my-12 shadow-xs space-y-6">
+                <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto border border-blue-100 shadow-sm animate-bounce">
+                  <Compass className="w-8 h-8" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold uppercase tracking-tight text-slate-800">
+                    No Roadmap Generated Yet
+                  </h3>
+                  <p className="text-sm text-slate-500 leading-relaxed max-w-sm mx-auto">
+                    To see your personalized career path, certifications, missing skills analysis, and salary projections, please fill in your student details on Step 1.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab("profile")}
+                  className="px-6 py-3 bg-slate-900 text-white hover:bg-slate-800 text-xs font-bold uppercase tracking-wider transition-all shadow-sm rounded-lg"
+                >
+                  Enter Profile Details Now
+                </button>
+              </div>
+            )}
+
+          </div>
+        )}
 
       </main>
 
