@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { StudentProfile, CareerGuidance } from "./types";
 import { StudentForm } from "./components/StudentForm";
+import careerGrowthStairs from "./assets/images/career_growth_stairs_1784136192260.jpg";
+import careerPlanningIcons from "./assets/images/career_planning_icons_1784136204978.jpg";
 import { GuidanceDashboard } from "./components/GuidanceDashboard";
 import { HistoryPanel } from "./components/HistoryPanel";
 import { Login } from "./components/Login";
@@ -320,7 +322,7 @@ export default function App() {
             <div className="shrink-0 relative group">
               <div className="absolute inset-0 bg-gradient-to-tr from-[var(--accent-primary)]/10 to-transparent rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <img
-                src="/src/assets/images/career_growth_stairs_1784136192260.jpg"
+                src={careerGrowthStairs}
                 alt="Career Growth Stairs"
                 referrerPolicy="no-referrer"
                 className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-xl object-cover border border-[var(--color-border)] shadow-xs group-hover:scale-105 transition-all duration-300 bg-white"
@@ -357,7 +359,7 @@ export default function App() {
             <div className="shrink-0 relative group">
               <div className="absolute inset-0 bg-gradient-to-tr from-[var(--accent-secondary)]/10 to-transparent rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <img
-                src="/src/assets/images/career_planning_icons_1784136204978.jpg"
+                src={careerPlanningIcons}
                 alt="Career Planning Icons"
                 referrerPolicy="no-referrer"
                 className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-xl object-cover border border-[var(--color-border)] shadow-xs group-hover:scale-105 transition-all duration-300 bg-white"
