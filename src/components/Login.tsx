@@ -600,14 +600,14 @@ export function Login({ onLogin }: LoginProps) {
 
               <div>
                 <h4 className="font-bold text-slate-850 mb-1 uppercase tracking-widest text-[10px]">
-                  3. Configure App Secrets inside Studio
+                  3. Configure App Secrets (AI Studio or Deployed Platform)
                 </h4>
                 <p className="text-[11px] text-slate-500 font-medium mb-2">
-                  Open the <span className="font-bold text-slate-900">Settings ⚙️ → Secrets</span> panel in the Google AI Studio sidebar and define:
+                  If testing inside Google AI Studio, add these in <span className="font-bold text-slate-900">Settings ⚙️ → Secrets</span>. If running your deployed app (e.g., on Render), define these in your host's <span className="font-bold text-slate-900">Environment Variables</span> dashboard:
                 </p>
                 <div className="grid grid-cols-1 gap-2 font-mono text-[10px] bg-slate-50 p-3 rounded-xl border border-slate-200 text-slate-700">
-                  <div><strong className="text-slate-900">GOOGLE_CLIENT_ID</strong> = <span className="opacity-75">"your-client-id"</span></div>
-                  <div><strong className="text-slate-900">GOOGLE_CLIENT_SECRET</strong> = <span className="opacity-75">"your-client-secret"</span></div>
+                  <div><strong className="text-slate-900">GOOGLE_CLIENT_ID</strong> = <span className="opacity-75">"your-google-client-id"</span></div>
+                  <div><strong className="text-slate-900">GOOGLE_CLIENT_SECRET</strong> = <span className="opacity-75">"your-google-client-secret"</span></div>
                 </div>
               </div>
             </div>

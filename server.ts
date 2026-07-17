@@ -500,13 +500,23 @@ app.post("/api/chat", async (req, res) => {
 
 // Helper to get Base URL dynamically
 const getBaseUrl = (req: express.Request) => {
+  const host = req.get("host") || "";
+  const protocol = req.protocol === "https" || req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
+  
+  // If we are serving on an external deployed domain (like onrender.com),
+  // we should always prioritize the live request host to make OAuth dynamically work
+  // across any platform the user deploys to, without requiring them to hardcode APP_URL!
+  if (host && !host.includes("localhost") && !host.includes("127.0.0.1") && (host.includes(".run.app") || host.includes(".com") || host.includes(".net") || host.includes(".org") || host.includes(".io"))) {
+    return `${protocol}://${host}`;
+  }
+
   const appUrl = process.env.APP_URL;
   if (appUrl && appUrl !== "MY_APP_URL" && appUrl.trim() !== "") {
     return appUrl.replace(/\/$/, "");
   }
-  const host = req.get("host") || "localhost:3000";
-  const protocol = req.protocol === "https" || req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
-  return `${protocol}://${host}`;
+
+  const fallbackHost = host || "localhost:3000";
+  return `${protocol}://${fallbackHost}`;
 };
 
 // Check if credentials are set
