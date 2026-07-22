@@ -104,7 +104,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
   };
 
   return (
-    <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--color-border)] shadow-[var(--card-shadow)] p-6 space-y-6 transition-all duration-300">
+    <div className="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--color-border)] shadow-[var(--card-shadow)] p-6 space-y-6 transition-all duration-300">
       {/* Header */}
       <div>
         <h2 className="text-lg font-bold tracking-tight text-[var(--text-main)] flex items-center gap-2">
@@ -127,7 +127,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
               key={preset.id}
               type="button"
               onClick={() => handleSelectPreset(preset.id)}
-              className="p-3 text-left border border-[var(--color-border)] hover:border-[var(--accent-primary)] hover:bg-[var(--accent-light)] rounded-xl transition-all duration-200 group cursor-pointer bg-[var(--bg-card)] shadow-xs hover:shadow-sm"
+              className="p-3 text-left border-2 border-[var(--color-border)] hover:border-[var(--accent-primary)] hover:bg-[var(--accent-light)] rounded-xl transition-all duration-200 group cursor-pointer bg-[var(--bg-card)] shadow-xs hover:shadow-sm"
             >
               <div className="font-semibold text-xs text-[var(--text-main)] group-hover:text-[var(--accent-primary)] transition-colors">
                 {preset.label}
@@ -140,10 +140,10 @@ export const StudentForm: React.FC<StudentFormProps> = ({
         </div>
       </div>
 
-      <div className="border-t border-[var(--color-border)] border-dashed my-4 opacity-50"></div>
+      <div className="border-t-2 border-[var(--color-border)] border-dashed my-4 opacity-70"></div>
 
       {/* Interactive Guide for Manual Form */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-[var(--bg-input)] border border-[var(--color-border)] rounded-xl transition-all duration-300">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 bg-[var(--bg-input)] border-2 border-[var(--color-border)] rounded-xl transition-all duration-300">
         <div className="text-left">
           <span className="text-xs font-bold text-[var(--text-main)] uppercase tracking-wide block">
             Customize Profile Details
@@ -158,7 +158,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({
             const el = document.getElementsByName("name")[0];
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }}
-          className="w-full sm:w-auto px-4 py-1.5 rounded-lg text-xs font-extrabold uppercase tracking-widest border border-[var(--accent-primary)]/40 hover:border-[var(--accent-primary)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-main)] hover:text-[var(--accent-primary)] transition-all cursor-pointer shadow-xs flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-4 py-1.5 rounded-lg text-xs font-extrabold uppercase tracking-widest border-2 border-[var(--accent-primary)] hover:bg-[var(--accent-light)] text-[var(--text-main)] hover:text-[var(--accent-primary)] transition-all cursor-pointer shadow-xs flex items-center justify-center gap-2"
         >
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-primary)] opacity-75"></span>

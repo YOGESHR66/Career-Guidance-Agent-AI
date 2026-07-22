@@ -38,15 +38,15 @@ export const THEMES: Theme[] = [
       "--text-main": "#0f172a", // Deep slate text
       "--text-muted": "#475569", // Muted slate blue
       "--text-inverse": "#ffffff",
-      "--color-border": "#e2e8f0", // Clean soft slate border
+      "--color-border": "#94a3b8", // Prominent dark slate border
       "--accent-primary": "#1e40af", // Elegant Navy/Royal Blue
       "--accent-primary-hover": "#1d4ed8", // Vibrant blue hover state
       "--accent-secondary": "#0284c7", // Sky blue accent
       "--accent-secondary-hover": "#0369a1",
       "--accent-glow": "rgba(30, 64, 175, 0.08)",
       "--accent-light": "#f0f7ff", // Soft modern light blue highlight box
-      "--accent-light-border": "#e0f2fe",
-      "--card-shadow": "0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.05)", // Soft modern professional shadow
+      "--accent-light-border": "#93c5fd",
+      "--card-shadow": "0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.05)", // Soft modern professional shadow
       "--primary-btn-text": "#ffffff",
     }
   },
@@ -63,14 +63,14 @@ export const THEMES: Theme[] = [
       "--text-main": "#f4f4f5",
       "--text-muted": "#a1a1aa",
       "--text-inverse": "#09090b",
-      "--color-border": "#27272a",
+      "--color-border": "#52525b", // Prominent dark zinc border
       "--accent-primary": "#22c55e", // Neon Green
       "--accent-primary-hover": "#15803d",
       "--accent-secondary": "#a855f7", // Neon Purple
       "--accent-secondary-hover": "#7e22ce",
       "--accent-glow": "rgba(34, 197, 94, 0.15)",
       "--accent-light": "#14532d",
-      "--accent-light-border": "#16a34a",
+      "--accent-light-border": "#22c55e",
       "--card-shadow": "0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 15px rgba(34, 197, 94, 0.05)",
       "--primary-btn-text": "#09090b",
     }
@@ -88,15 +88,15 @@ export const THEMES: Theme[] = [
       "--text-main": "#4c1d24",
       "--text-muted": "#9f5f6b",
       "--text-inverse": "#ffffff",
-      "--color-border": "#ffe4e6",
+      "--color-border": "#f472b6", // Darkened blossom border
       "--accent-primary": "#ec4899", // Blossom Pink
       "--accent-primary-hover": "#db2777",
       "--accent-secondary": "#d97706", // Amber Gold
       "--accent-secondary-hover": "#b45309",
       "--accent-glow": "rgba(236, 72, 153, 0.08)",
       "--accent-light": "#fff1f2",
-      "--accent-light-border": "#ffe4e6",
-      "--card-shadow": "0 10px 25px -5px rgba(236, 72, 153, 0.05)",
+      "--accent-light-border": "#f472b6",
+      "--card-shadow": "0 10px 25px -5px rgba(236, 72, 153, 0.08)",
       "--primary-btn-text": "#ffffff",
     }
   },
@@ -113,15 +113,15 @@ export const THEMES: Theme[] = [
       "--text-main": "#0f2d1d",
       "--text-muted": "#386b52",
       "--text-inverse": "#ffffff",
-      "--color-border": "#e2ece6",
+      "--color-border": "#10b981", // Darkened emerald border
       "--accent-primary": "#059669", // Emerald Green
       "--accent-primary-hover": "#047857",
       "--accent-secondary": "#d97706", // Ochre Gold
       "--accent-secondary-hover": "#b45309",
       "--accent-glow": "rgba(5, 150, 105, 0.08)",
       "--accent-light": "#ecfdf5",
-      "--accent-light-border": "#d1fae5",
-      "--card-shadow": "0 10px 25px -5px rgba(5, 150, 105, 0.05)",
+      "--accent-light-border": "#34d399",
+      "--card-shadow": "0 10px 25px -5px rgba(5, 150, 105, 0.08)",
       "--primary-btn-text": "#ffffff",
     }
   },
@@ -138,14 +138,14 @@ export const THEMES: Theme[] = [
       "--text-main": "#f1eefc",
       "--text-muted": "#9f93cd",
       "--text-inverse": "#0b0813",
-      "--color-border": "#211942",
+      "--color-border": "#7c3aed", // Darkened purple border
       "--accent-primary": "#06b6d4", // Holographic Cyan
       "--accent-primary-hover": "#0891b2",
       "--accent-secondary": "#ec4899", // Galaxy Pink
       "--accent-secondary-hover": "#db2777",
       "--accent-glow": "rgba(6, 182, 212, 0.15)",
       "--accent-light": "#161033",
-      "--accent-light-border": "#311c63",
+      "--accent-light-border": "#a855f7",
       "--card-shadow": "0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(162, 28, 175, 0.05)",
       "--primary-btn-text": "#0b0813",
     }
@@ -163,15 +163,15 @@ export const THEMES: Theme[] = [
       "--text-main": "#2c1c0a",
       "--text-muted": "#6f4e27",
       "--text-inverse": "#ffffff",
-      "--color-border": "#f1e4cb",
+      "--color-border": "#b45309", // Darkened amber border
       "--accent-primary": "#991b1b", // Brick Red
       "--accent-primary-hover": "#7f1d1d",
       "--accent-secondary": "#c2410c", // Deep Ochre
       "--accent-secondary-hover": "#9a3412",
       "--accent-glow": "rgba(153, 27, 27, 0.08)",
       "--accent-light": "#fdf4e3",
-      "--accent-light-border": "#fed7aa",
-      "--card-shadow": "0 10px 25px -5px rgba(44, 28, 10, 0.04)",
+      "--accent-light-border": "#f59e0b",
+      "--card-shadow": "0 10px 25px -5px rgba(44, 28, 10, 0.08)",
       "--primary-btn-text": "#ffffff",
     }
   }

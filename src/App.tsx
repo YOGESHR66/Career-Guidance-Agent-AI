@@ -469,7 +469,7 @@ export default function App() {
                 selectedIdx={selectedHistoryIdx}
               />
 
-              <div className="bg-[var(--bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-[var(--card-shadow)] space-y-3 transition-colors duration-300">
+              <div className="bg-[var(--bg-card)] p-5 rounded-2xl border-2 border-[var(--color-border)] shadow-[var(--card-shadow)] space-y-3 transition-colors duration-300">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
                   Academic Counseling Guide
                 </h4>

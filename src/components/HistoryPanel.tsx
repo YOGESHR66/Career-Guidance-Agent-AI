@@ -24,7 +24,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
   }
 
   return (
-    <div className="bg-[var(--bg-card)] rounded-none border border-[var(--color-border)] shadow-[var(--card-shadow)] p-5 space-y-4 transition-all duration-300">
+    <div className="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--color-border)] shadow-[var(--card-shadow)] p-5 space-y-4 transition-all duration-300">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold uppercase tracking-tight text-[var(--text-main)] flex items-center gap-2">
           <History className="w-4 h-4 text-[var(--accent-primary)]" />
@@ -39,7 +39,7 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
       </div>
 
       {showConfirmClear && (
-        <div className="bg-rose-500/10 border border-rose-500/20 p-3 flex flex-col gap-2 text-xs text-[var(--text-main)] rounded-none animate-in fade-in duration-200">
+        <div className="bg-rose-500/10 border-2 border-rose-500/30 p-3 flex flex-col gap-2 text-xs text-[var(--text-main)] rounded-xl animate-in fade-in duration-200">
           <span className="font-semibold text-rose-600 dark:text-rose-400">
             Clear all consultation history? This action cannot be undone.
           </span>
@@ -49,13 +49,13 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
                 onClearHistory();
                 setShowConfirmClear(false);
               }}
-              className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold uppercase rounded-none cursor-pointer"
+              className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold uppercase rounded-lg cursor-pointer"
             >
               Yes, Clear All
             </button>
             <button
               onClick={() => setShowConfirmClear(false)}
-              className="px-2.5 py-1 bg-[var(--bg-card)] border border-[var(--color-border)] hover:bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] font-bold uppercase rounded-none cursor-pointer"
+              className="px-2.5 py-1 bg-[var(--bg-card)] border-2 border-[var(--color-border)] hover:bg-[var(--bg-input)] text-[var(--text-muted)] text-[10px] font-bold uppercase rounded-lg cursor-pointer"
             >
               Cancel
             </button>
@@ -63,11 +63,11 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
         </div>
       )}
 
-      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+      <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
         {history.map((item, idx) => (
           <div
             key={idx}
-            className={`p-3 rounded-none border text-left transition-all relative group flex items-center justify-between ${
+            className={`p-3 rounded-xl border-2 text-left transition-all relative group flex items-center justify-between ${
               selectedIdx === idx
                 ? "bg-[var(--accent-light)] border-[var(--accent-primary)] text-[var(--text-main)] shadow-sm"
                 : "bg-[var(--bg-card)] border-[var(--color-border)] text-[var(--text-main)] hover:bg-[var(--bg-input)] shadow-xs"
